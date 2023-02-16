@@ -94,8 +94,7 @@ const postsSlice = createSlice({
                 });
 
                 // Add any fetched posts to the array
-                state.posts = state.posts.concat(loadedPosts)
-                
+                state.posts = loadedPosts
             })
             .addCase(fetchPosts.rejected, (state, action) => {
                 state.status = 'failed'
