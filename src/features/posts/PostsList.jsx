@@ -14,6 +14,7 @@ const PostsList = () => {
     const error = useSelector(getPostsError);
     console.log(posts)
     console.log(postsStatus)
+   
 
     useEffect(() => {
         //dispath the fetch posts async thunk when the status is idle
