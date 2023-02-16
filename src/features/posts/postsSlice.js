@@ -6,7 +6,7 @@ const POSTS_URL = "https://jsonplaceholder.typicode.com/posts";
 
 const initialState = {
     posts: [],
-    status: "idle", //"idle" |"loading" || "succeeded" | "failed"\
+    status: "idle", //"idle" |"loading" | "succeeded" | "failed"
     error: null
 }
 
@@ -15,6 +15,7 @@ const initialState = {
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
     const response = await axios.get(POSTS_URL)
     return response.data
+    
 })
 
 //add posts thunk
@@ -76,6 +77,7 @@ const postsSlice = createSlice({
             })
             .addCase(fetchPosts.fulfilled, (state, action) => {
                 state.status = 'succeeded'
+             
                 // Adding date and reactions
                 let min = 1;
                 //add properties not provided byApI
@@ -103,6 +105,7 @@ const postsSlice = createSlice({
                 // Creating sortedPosts & assigning the id 
                 // would be not be needed if the fake API 
                 // returned accurate new post IDs
+            
                 const sortedPosts = state.posts.sort((a, b) => {
                     if (a.id > b.id) return 1
                     if (a.id < b.id) return -1
@@ -129,7 +132,7 @@ const postsSlice = createSlice({
 })
 
 //creating the selector in the slice for consistency
-export const selectAllPosts = (state) => state.posts.posts;
+export const selectAllPosts = (state) => state.posts;
 export const getPostsStatus = (state) => state.posts.status;
 export const getPostsError = (state) => state.posts.error;
 

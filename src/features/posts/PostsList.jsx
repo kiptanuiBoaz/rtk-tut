@@ -13,6 +13,7 @@ const PostsList = () => {
     const postsStatus = useSelector(getPostsStatus);
     const error = useSelector(getPostsError);
     console.log(posts)
+    console.log(postsStatus)
 
     useEffect(() => {
         //dispath the fetch posts async thunk when the status is idle
@@ -28,7 +29,7 @@ const PostsList = () => {
         content = <p>Loading...</p>
     } else if (postsStatus === 'succeeded') {
         // create copy and sort by date
-        const orderedPosts = posts.slice().sort((a, b) => b.date.localeCompare(a.date))
+        const orderedPosts = posts.posts.slice().sort((a, b) => b.date.localeCompare(a.date))
         content = orderedPosts.map(post => <PostsExcerpt key={post.id} post={post} />)
 
     } else if (postsStatus === 'failed') {
