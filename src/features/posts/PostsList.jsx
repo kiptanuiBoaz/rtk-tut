@@ -12,9 +12,7 @@ const PostsList = () => {
     const posts = useSelector(selectAllPosts);
     const postsStatus = useSelector(getPostsStatus);
     const error = useSelector(getPostsError);
-    console.log(posts)
-    console.log(postsStatus)
-   
+
 
     useEffect(() => {
         //dispath the fetch posts async thunk when the status is idle
@@ -39,7 +37,6 @@ const PostsList = () => {
 
     return (
         <section>
-            <h2>Posts</h2>
             {content}
         </section>
     )

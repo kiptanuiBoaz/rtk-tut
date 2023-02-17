@@ -1,21 +1,28 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewPost } from "./postsSlice"; //   from slice
+import { addNewPost, selectAllPosts } from "./postsSlice"; //   from slice
 import { selectAllUsers } from "../users/usersSlice";
+import { useNavigate } from "react-router-dom";
 
 const AddPostForm = () => {
     const dispatch = useDispatch()
+    const navigate = useNavigate();
 
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [userId, setUserId] = useState('')
     const [addRequestStatus, setAddRequestStatus] = useState("idle");
+   
 
     const users = useSelector(selectAllUsers)//reading from the golbal users state
+    const posts = useSelector(selectAllPosts);
+    // const [postId, setPostId] = useState(posts.posts.find(post => post.title === title)?.id || '');
+    // console.log(userId);
 
     const onTitleChanged = e => setTitle(e.target.value)
     const onContentChanged = e => setContent(e.target.value)
     const onAuthorChanged = e => setUserId(e.target.value)
+    
 
     //checking if title content and userId are true befor the button can be clikable
     const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle';
@@ -27,9 +34,12 @@ const AddPostForm = () => {
                 //dispatch asyncThunk to slice
                 dispatch(addNewPost({ title, body: content, userId })).unwrap()
                 //empty the state after dipsatch
+
+                navigate(`/`)
                 setTitle('')
                 setContent('')
                 setUserId('')
+              
             } catch (err) {
                 console.error('Failed to save the post', err)
             } finally {
