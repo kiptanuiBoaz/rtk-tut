@@ -9,15 +9,16 @@ const Header = () => {
         <header className="Header">
             <h1>Redux Blog</h1>
             <nav>
+                <button onClick={() => { dispatch(increaseCount()) }}>
+                    {count}
+                </button>
                 <ul>
                     <li><Link to="/">Home</Link></li>
                     <li><Link to="post">Post</Link></li>
                     <li><Link to="user">Users</Link></li>
                 </ul>
 
-                <button onClick={() => { dispatch(increaseCount()) }}>
-                    {count}
-                </button>
+
             </nav>
         </header>
     )

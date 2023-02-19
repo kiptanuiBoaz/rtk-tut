@@ -1,15 +1,20 @@
-import { createSlice, nanoid, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, nanoid, createAsyncThunk, createSelector, createEntityAdapter } from "@reduxjs/toolkit";
 import { sub } from "date-fns";
 import axios from "axios";
 
 const POSTS_URL = "https://jsonplaceholder.typicode.com/posts";
 
-const initialState = {
-    posts: [],
-    status: "idle", //"idle" |"loading" | "succeeded" | "failed"
+//from createEntity API
+const postsAdapter = createEntityAdapter({
+    sortComparer: (a, b) => b.date.localeCompare(a.date)
+})
+
+//initial state using normalized state
+const initialState = postsAdapter.getInitialState({
+    status: 'idle', //'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
-    count:0
-}
+    count: 0
+})
 
 //fetch posts thunk
 //accepts the prefix for generated action type (slice/fn) and a payload creator callbacka as arguments
@@ -88,13 +93,13 @@ const postsSlice = createSlice({
         reactionAdded(state, action) {
             const { postId, reaction } = action.payload
             //find if the reacted post exists
-            const existingPost = state.posts.find(post => post.id === postId);
+            const existingPost = state.entities[postId] //lookup the specific post in the entities object
             // increment it's reaction state
             if (existingPost) {
                 existingPost.reactions[reaction]++
             }
         },
-        increaseCount(state,action){
+        increaseCount(state, action) {
             state.count = state.count + 1
         }
     },
@@ -127,7 +132,7 @@ const postsSlice = createSlice({
                 });
 
                 // Add any fetched posts to the array
-                state.posts = loadedPosts
+                postsAdapter.upsertMany(state, loadedPosts)
             })
 
             .addCase(fetchPosts.rejected, (state, action) => {
@@ -161,7 +166,7 @@ const postsSlice = createSlice({
                 }
                 console.log(action.payload)
                 //mutating-state-like behaviour handled by  immer.js
-                state.posts.push(action.payload)
+                 postsAdapter.addOne(state, action.payload)
             })
 
             .addCase(updatePost.fulfilled, (state, action) => {
@@ -171,10 +176,10 @@ const postsSlice = createSlice({
                     console.log(action.payload)
                     return;
                 }
-                const { id } = action.payload;
+                // const { id } = action.payload;
                 action.payload.date = new Date().toISOString();
-                const posts = state.posts.filter(post => post.id !== id);
-                state.posts = [...posts, action.payload];
+                // const posts = state.posts.filter(post => post.id !== id);
+                postsAdapter.upsertOne(state, action.payload)
             })
 
             .addCase(deletePost.fulfilled, (state, action) => {
@@ -184,19 +189,37 @@ const postsSlice = createSlice({
                     return;
                 }
                 const { id } = action.payload;
-                const posts = state.posts.filter(post => post.id !== id);
-                state.posts = posts;
+                postsAdapter.removeOne(state, id)
+                
             })
 
     }
 })
 
 //creating the selector in the slice for consistency
-export const selectAllPosts = (state) => state.posts;
+// export const selectAllPosts = (state) => state.posts;
 export const getPostsStatus = (state) => state.posts.status;
 export const getPostsError = (state) => state.posts.error;
-export const getCount = (state) => state.count;
-export const selectPostById = (state, postId) => state.posts.posts.find(post => post.id === postId);
+export const getCount = (state) => state.posts.count;
+
+// export const selectPostById = (state, postId) => state.posts.posts.find(
+//     post => post.id === postId
+// );
+
+//getSelectors creates these selectors and we rename them with aliases using destructuring
+export const {
+    selectAll: selectAllPosts,
+    selectById: selectPostById,
+    selectIds: selectPostIds
+    // Pass in a selector that returns the posts slice of state
+} = postsAdapter.getSelectors(state => state.posts)
+
+
+//memoized selector
+export const selectPostsByUser = createSelector(
+    [selectAllPosts, (state, userId) => userId], //dependencies
+    (posts, userId) => posts.filter(post => post.userId === userId) //rereun the selector only when the posts or user Id changes
+)
 
 export const { postAdded, reactionAdded, increaseCount } = postsSlice.actions;//to components
 export default postsSlice.reducer;//to the store

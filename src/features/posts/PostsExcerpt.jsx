@@ -19,5 +19,6 @@ const PostsExept = ({ post }) => {
         </article>
     )
 }
+//memoize the component(doesn't rerender if the prop doesn't chav)
 
 export default PostsExept
