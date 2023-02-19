@@ -7,7 +7,8 @@ const POSTS_URL = "https://jsonplaceholder.typicode.com/posts";
 const initialState = {
     posts: [],
     status: "idle", //"idle" |"loading" | "succeeded" | "failed"
-    error: null
+    error: null,
+    count:0
 }
 
 //fetch posts thunk
@@ -19,7 +20,7 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
 })
 
 //add posts thunk
-//recieves initial post whick will be the body of axios requset
+//recieves initial post whick will be the body of axios request
 export const addNewPost = createAsyncThunk('posts/addNewPost', async (initialPost) => {
     const response = await axios.post(POSTS_URL, initialPost)
     return response.data
@@ -47,7 +48,8 @@ export const deletePost = createAsyncThunk('posts/deletePost', async (initialPos
         if (response?.status === 200) return initialPost;
         return `${response?.status}: ${response?.statusText}`;
     } catch (err) {
-        return err.message;
+        // return err.message;
+        return initialPost //onlu for testing this sspecific scenario
     }
 })
 
@@ -91,6 +93,9 @@ const postsSlice = createSlice({
             if (existingPost) {
                 existingPost.reactions[reaction]++
             }
+        },
+        increaseCount(state,action){
+            state.count = state.count + 1
         }
     },
     //define the behavior of the reducer in response to other actions apart from dispatched ones
@@ -152,7 +157,7 @@ const postsSlice = createSlice({
                     wow: 0,
                     heart: 0,
                     rocket: 0,
-                    coffee: 0,
+                    coffee: 0
                 }
                 console.log(action.payload)
                 //mutating-state-like behaviour handled by  immer.js
@@ -190,9 +195,10 @@ const postsSlice = createSlice({
 export const selectAllPosts = (state) => state.posts;
 export const getPostsStatus = (state) => state.posts.status;
 export const getPostsError = (state) => state.posts.error;
+export const getCount = (state) => state.count;
 export const selectPostById = (state, postId) => state.posts.posts.find(post => post.id === postId);
 
-export const { postAdded, reactionAdded } = postsSlice.actions;//to components
+export const { postAdded, reactionAdded, increaseCount } = postsSlice.actions;//to components
 export default postsSlice.reducer;//to the store
 
 //thunk - is a piece of code that does some delayed work
