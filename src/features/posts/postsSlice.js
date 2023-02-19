@@ -146,12 +146,12 @@ const postsSlice = createSlice({
                 // would be not be needed if the fake API 
                 // returned accurate new post IDs
 
-                const sortedPosts = state.posts.sort((a, b) => {
-                    if (a.id > b.id) return 1
-                    if (a.id < b.id) return -1
-                    return 0
-                })
-                action.payload.id = sortedPosts[sortedPosts.length - 1].id + 1;
+                // const sortedPosts = state.posts.sort((a, b) => {
+                //     if (a.id > b.id) return 1
+                //     if (a.id < b.id) return -1
+                //     return 0
+                // })
+                action.payload.id = state.ids[state.ids.length - 1] + 1
                 // End fix for fake API post IDs 
 
                 action.payload.userId = Number(action.payload.userId)//api provided Id as string
@@ -166,7 +166,7 @@ const postsSlice = createSlice({
                 }
                 console.log(action.payload)
                 //mutating-state-like behaviour handled by  immer.js
-                 postsAdapter.addOne(state, action.payload)
+                postsAdapter.addOne(state, action.payload)
             })
 
             .addCase(updatePost.fulfilled, (state, action) => {
@@ -190,7 +190,7 @@ const postsSlice = createSlice({
                 }
                 const { id } = action.payload;
                 postsAdapter.removeOne(state, id)
-                
+
             })
 
     }
