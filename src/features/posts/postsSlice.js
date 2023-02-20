@@ -34,19 +34,30 @@ export const extendedAPiSlice = apiSlice.injectEndpoints({
                 // normalize the state
                 return postsAdapter.setAll(initialState, loadedPosts)
             },
+            //refetch the lists if any Ids is invalidated
             providesTags: (result, error, arg) => [
                 { type: 'Post', id: "LIST" },
                 ...result.ids.map(id => ({ type: 'Post', id }))
             ]
         }),
     })
-})
+});
 
-//creating the selector in the slice for consistency
-// export const selectAllPosts = (state) => state.posts;
-export const getPostsStatus = (state) => state.posts.status;
-export const getPostsError = (state) => state.posts.error;
-export const getCount = (state) => state.posts.count;
+//export generated hooks to components
+export const {
+    useGetPostsQuery
+} = extendedAPiSlice;
+
+
+
+// returns the query result object
+export const selectPostsResult = extendedApiSlice.endpoints.getPosts.select()
+
+// Creates memoized selector
+const selectPostsData = createSelector(
+    selectPostsResult,
+    postsResult => postsResult.data // normalized state object with ids & entities
+)
 
 //getSelectors creates these selectors and we rename them with aliases using destructuring
 export const {
@@ -54,16 +65,11 @@ export const {
     selectById: selectPostById,
     selectIds: selectPostIds
     // Pass in a selector that returns the posts slice of state
-} = postsAdapter.getSelectors(state => state.posts)
+} = postsAdapter.getSelectors(state => selectPostsData(state) ?? initialState)
 
 
-//memoized selector
-export const selectPostsByUser = createSelector(
-    [selectAllPosts, (state, userId) => userId], //dependencies
-    (posts, userId) => posts.filter(post => post.userId === userId) //rereun the selector only when the posts or user Id changes
-)
 
-export const { postAdded, reactionAdded, increaseCount } = postsSlice.actions;//to components
-export default postsSlice.reducer;//to the store
 
 //thunk - is a piece of code that does some delayed work
+// nullish coalescing operator (??) - returns its right-hand side operand when its left-hand side operand is nullish,
+//  (null or undefined), and otherwise returns its left-hand side operand
