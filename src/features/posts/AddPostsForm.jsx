@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { addNewPost, selectAllPosts } from "./postsSlice"; //   from slice
+import { useSelector } from "react-redux";
+import { selectAllPosts, useAddNewPostMutation } from "./postsSlice"; //   from slice
 import { selectAllUsers } from "../users/usersSlice";
 import { useNavigate } from "react-router-dom";
 
 const AddPostForm = () => {
-    const dispatch = useDispatch()
+    const [addNewPost, { isLoading }] = useAddNewPostMutation();
     const navigate = useNavigate();
 
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [userId, setUserId] = useState('')
-    const [addRequestStatus, setAddRequestStatus] = useState("idle");
-   
+
 
     const users = useSelector(selectAllUsers)//reading from the golbal users state
     const posts = useSelector(selectAllPosts);
@@ -22,28 +21,26 @@ const AddPostForm = () => {
     const onTitleChanged = e => setTitle(e.target.value)
     const onContentChanged = e => setContent(e.target.value)
     const onAuthorChanged = e => setUserId(e.target.value)
-    
+
 
     //checking if title content and userId are true befor the button can be clikable
-    const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle';
+    const canSave = [title, content, userId].every(Boolean) && !isLoading;
 
-    const onSavePostClicked = () => {
+    const onSavePostClicked = async () => {
         if (canSave) {
             try {
-                setAddRequestStatus('pending')
-                //dispatch asyncThunk to slice
-                dispatch(addNewPost({ title, body: content, userId })).unwrap()
-                //empty the state after dipsatch
+                //unwrap is used to extract resolved values in Promises
+                //unwrap throws an error if it occers hence passes the control to the catch block
+                //mutation method from postSlice
+                await addNewPost({ title, body: content, userId }).unwrap();
 
                 navigate(`/`)
                 setTitle('')
                 setContent('')
                 setUserId('')
-              
+
             } catch (err) {
                 console.error('Failed to save the post', err)
-            } finally {
-                setAddRequestStatus('idle')
             }
         }
     }

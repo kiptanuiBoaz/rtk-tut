@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from "react-redux";
-import { selectPostIds, fetchPosts } from "./postsSlice";
+import { selectPostIds } from "./postsSlice";
 import PostsExcerpt from './PostsExcerpt';
 import { useGetPostsQuery } from './postsSlice';
 
@@ -10,16 +10,8 @@ const PostsList = () => {
     const { isLaoding, isSuccess, isError, error } = useGetPostsQuery()
     const dispatch = useDispatch();
 
-    //selcetors imported from the slice
-    const orderedPostIds = useSelector(selectPostIds);
-
-    useEffect(() => {
-        //dispath the fetch posts async thunk when the status is idle
-        if (postsStatus === "idle") {
-            dispatch(fetchPosts());
-        }
-    }, [postsStatus, dispatch])
-
+    const orderedPostIds = useSelector(selectPostIds)
+    
     // content to be given diff values based on the post status
     let content;
     if (isLaoding) {
