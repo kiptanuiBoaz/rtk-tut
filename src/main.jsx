@@ -4,9 +4,12 @@ import App from './App'
 import './index.css'
 import { store } from "./app/store"
 import { Provider } from 'react-redux';
-import { fetchUsers } from './features/users/usersSlice'
-import { BrowserRouter as Router, Routes, Route, RouterProvider } from 'react-router-dom'
-//fetch users immediately the app starts
+import { fetchUsers } from './features/users/usersSlice';
+import { extendedAPiSlice } from './features/posts/postsSlice';
+import { BrowserRouter as Router, Routes, Route, RouterProvider } from 'react-router-dom';
+
+//fetch data immediately the app starts
+store.dispatch(extendedAPiSlice.endpoints.getPosts.initiate());
 store.dispatch(fetchUsers());
 
 ReactDOM.createRoot(document.getElementById('root')).render(
