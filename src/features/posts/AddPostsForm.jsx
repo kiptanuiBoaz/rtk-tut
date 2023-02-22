@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { selectAllPosts, useAddNewPostMutation } from "./postsSlice"; //   from slice
-import { selectAllUsers } from "../users/usersSlice";
+import {  useAddNewPostMutation } from "./postsSlice"; //   from slice
 import { useNavigate } from "react-router-dom";
 
 const AddPostForm = () => {

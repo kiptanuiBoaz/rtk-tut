@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PostsList from './features/posts/PostsList';
 import AddPostForm from './features/posts/AddPostsForm';
-import UsersList from './features/users/Users';
+import UsersList from './features/users/UsersList';
 import UserPage from './features/users/UserPage';
 import Layout from './components/Layout';
 import { Route, Routes, Navigate } from 'react-router-dom';
@@ -31,7 +31,7 @@ function App() {
           <Route path=":userId" element={<UserPage />} />
         </Route>
 
-        
+
         {/* Catch all - replace with 404 component if you want */}
         <Route path="*" element={<Navigate to="/" replace />} />
 

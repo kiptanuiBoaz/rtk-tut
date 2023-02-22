@@ -1,7 +1,6 @@
-import { nanoid, createSelector, createEntityAdapter } from "@reduxjs/toolkit";
+import { createSelector, createEntityAdapter } from "@reduxjs/toolkit";
 import { sub } from "date-fns";
 import { apiSlice } from "../api/apiSlice";
-import axios from "axios";
 
 
 //from createEntity API

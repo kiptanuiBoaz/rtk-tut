@@ -1,5 +1,4 @@
-import { useSelector } from 'react-redux'
-import { selectUserById } from '../users/usersSlice'
+import { useGetUsersQuery } from '../users/usersSlice'
 import { useGetPostsByUserIdQuery } from '../posts/postsSlice';
 import { Link, useParams } from 'react-router-dom'
 
@@ -9,7 +8,20 @@ const UserPage = () => {
 
     //pass callback to useSelector for optimisation
     //find the current user from array of users
-    const user = useSelector(state => selectUserById(state, Number(userId)))
+    const { user,
+        isLoading: isLoadingUser,
+        isSuccess: isSuccessUser,
+        isError: isErrorUser,
+        error: errorUser
+    } = useGetUsersQuery('getUsers', {
+        selectFromResult: ({ data, isLoading, isSuccess, isError, error }) => ({
+            user: data?.entities[userId],
+            isLoading,
+            isSuccess,
+            isError,
+            error
+        }),
+    })
 
     const {
         data: postsForUser,
@@ -22,28 +34,27 @@ const UserPage = () => {
     console.log(postsForUser)
 
     let content;
-    if (isLoading) {
+    if (isLoading || isLoadingUser) {
         content = <p>Loading...</p>
-    } else if (isSuccess) {
-        //access the normalized data from state
+    } else if (isSuccess && isSuccessUser) {
         const { ids, entities } = postsForUser
-        content = ids.map(id => (
-            <li key={id}>
-                {/* use the Id as the object lookup */}
-                <Link to={`/post/${id}`}>{entities[id].title}</Link>
-            </li>
-        ))
-    } else if (isError) {
-        content = <p>{error}</p>;
+        content = (
+            <section>
+                <h2>{user?.name}</h2>
+                <ol>
+                    {ids.map(id => (
+                        <li key={id}>
+                            <Link to={`/post/${id}`}>{entities[id].title}</Link>
+                        </li>
+                    ))}
+                </ol>
+            </section>
+        )
+    } else if (isError || isErrorUser) {
+        content = <p>{error || errorUser}</p>;
     }
 
-    return (
-        <section>
-            <h2>{user?.name}</h2>
-
-            <ol>{content}</ol>
-        </section>
-    )
+    return content
 }
 
 export default UserPage

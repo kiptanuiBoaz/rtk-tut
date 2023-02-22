@@ -1,33 +1,44 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createSelector, createEntityAdapter } from "@reduxjs/toolkit";
+import { apiSlice } from "../api/apiSlice";
 
-const USERS_URL = "https://jsonplaceholder.typicode.com/users";
+//from createEntity API
+const usersAdapter = createEntityAdapter({});
 
-const initialState = [];
-
-//parameters (reducerName/function,callback)
-export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
-    const response = await axios.get(USERS_URL);
-    return response.data
-})
+//initial state using normalized state
+const initialState = usersAdapter.getInitialState()
 
 
-const usersSlice = createSlice({
-    name: "users",
-    initialState,
-    reducers: {},
-    extraReducers(builder) {
-        builder.addCase(fetchUsers.fulfilled, (state, action) => {
-            //completely ovveriding the state
-            return action.payload;
+export const extendedAPiSlice = apiSlice.injectEndpoints({
+    endpoints: (builder) => ({
+        //get all users
+        getUsers: builder.query({
+            query: () => "/users",
+            transformResponse: responseData => {
+                return usersAdapter.setAll(initialState, responseData)
+            },
+           
+            providesTags: (result, error, arg) => [
+                { type: 'User', id: "LIST" },
+                ...result.ids.map(id => ({ type: 'User', id }))
+            ]
+        }),
+
+        //get User by Id
+        getUserById: builder.query({
+            query: id => `/users/?userId=${id}`,
+
+            transformResponse: responseData => {
+                return usersAdapter.setAll(initialState, responseData)
+            },
+            //tag to invalidate a specific user cache
+            providesTags: (result, error, arg) => [
+                ...result.ids.map(id => ({ type: 'User', id }))
+            ]
+
         })
-    }
-})
+    })
+});
 
-export const selectAllUsers = (state) => state.users; //selector
+export const { useGetUsersQuery, useGetUserById } = extendedAPiSlice;
 
 
-export const selectUserById = (state, userId) =>
-    state.users.find(user => user.id === userId)
-
-export default usersSlice.reducer;
